@@ -11,26 +11,28 @@ function createFeedbackControlDemo() {
 
     }
 
-    var clients = [];
-    var processors = [];
-    var payloads = null;
+    var domain = Object();
+    var d = domain;
+    domain.clients = [];
+    domain.processors = [];
+    domain.requests = null;
+
     var fired = false;
 
     function create () {
         game.physics.startSystem(Phaser.Physics.ARCADE);
-        clients = createClients();
-        processors = createProcessors();
+        domain.clients = createClients();
+        domain.processors = createProcessors();
+        domain.requests = createRequests();
     }
 
     function update() {
         if(!fired){
-            console.log(clients[0].x);
-            console.log(clients[0].y);
-            var payload = game.add.sprite(clients[0].x, clients[0].y, 'payload')
+            console.log(d.clients[0].x);
+            console.log(d.clients[0].y);
+            var payload = game.add.sprite(d.clients[0].x, d.clients[0].y, 'payload')
             game.physics.enable(payload, Phaser.Physics.ARCADE);
-            console.log(payload);
-            console.log(processors[0]);
-            game.physics.arcade.moveToObject(payload, processors[0], 500);
+            game.physics.arcade.moveToObject(payload, d.processors[0], null, 250);
             console.log("fired");
             fired = true;
         }
@@ -55,6 +57,14 @@ function createFeedbackControlDemo() {
             processors.push(p);
         }
         return processors;
+    }
+
+    function createRequests() {
+        var requests = game.add.group();
+        requests.enableBody = true;
+        requests.physicsBodyType = Phaser.Physics.ARCADE;
+        requests.createMultiple(domain.clients.length * 2, 'payload');
+        return requests;
     }
 
     return game;
