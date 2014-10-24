@@ -35,6 +35,9 @@ function createFeedbackControlDemo() {
             fired = true;
         }
 
+
+        sendRequests();
+
         game.physics.arcade.overlap(d.requests, d.processors, requestArrivalHandler, null, this);
     }
 
@@ -43,13 +46,28 @@ function createFeedbackControlDemo() {
 
     }
 
+    function sendRequests(){
+        d.clients.forEach(function(client) {
+            // console.log(client.lastRequest + client.requestPeriod - game.time.now);
+            if(client.lastRequest + client.requestPeriod <= game.time.now){
+                client.lastRequest = game.time.now;
+                request = d.requests.getFirstExists(false);
+                request.reset(client.body.x, client.body.y);
+                game.physics.arcade.moveToObject(request, d.processors.children[0], 500);
+            }
+        });
+    }
+
     function createClients(){
         var clients = game.add.group();
         clients.enableBody = true;
         clients.physicsBodyType = Phaser.Physics.ARCADE;
 
         for(var x = 0; x < 10; x++){
-            clients.create(game.world.width / 10 * x, 50, 'client');
+            var c = clients.create(game.world.width / 10 * x, 50, 'client');
+            c.requestPeriod = (Math.floor(Math.random() * (10 - 5)) + 5) * 1000;
+            console.log(c.requestPeriod);
+            c.lastRequest = game.time.now;
         }
         return clients;
     } 
