@@ -13,8 +13,9 @@ function createFeedbackControlDemo() {
 
     var domain = Object();
     var d = domain;
-    domain.clients = [];
-    domain.processors = [];
+    game.domain = domain;
+    domain.clients = null;
+    domain.processors = null;
     domain.requests = null;
 
     var fired = false;
@@ -28,33 +29,38 @@ function createFeedbackControlDemo() {
 
     function update() {
         if(!fired){
-            console.log(d.clients[0].x);
-            console.log(d.clients[0].y);
-            var payload = game.add.sprite(d.clients[0].x, d.clients[0].y, 'payload')
+            var payload = game.add.sprite(d.clients.children[0].x, d.clients.children[0].y, 'payload')
             game.physics.enable(payload, Phaser.Physics.ARCADE);
-            game.physics.arcade.moveToObject(payload, d.processors[0], null, 250);
-            console.log("fired");
+            game.physics.arcade.moveToObject(payload, d.processors.children[0], null, 250);
             fired = true;
         }
+
+        game.physics.arcade.overlap(d.requests, d.processors, requestArrivalHandler, null, this);
+    }
+
+    function requestArrivalHandler(request, processor) {
+        request.kill();
+
     }
 
     function createClients(){
-        var clients = [];
+        var clients = game.add.group();
+        clients.enableBody = true;
+        clients.physicsBodyType = Phaser.Physics.ARCADE;
+
         for(var x = 0; x < 10; x++){
-            var c = game.add.sprite(game.world.width / 10 * x, 50, 'client');
-            game.physics.enable(c, Phaser.Physics.ARCADE);
-            clients.push(c);
+            clients.create(game.world.width / 10 * x, 50, 'client');
         }
         return clients;
     } 
 
     function createProcessors() {
-        var processors = [];
+        var processors = game.add.group();
+        processors.enableBody = true;
+        processors.physicsBodyType = Phaser.Physics.ARCADE;
         for(var x = 0; x < 2; x++){
-            var p = game.add.sprite(game.world.centerX - (x * 200), 
-                                    game.world.height - 300, 'processor');
-            game.physics.enable(p, Phaser.Physics.ARCADE);
-            processors.push(p);
+            processors.create(game.world.centerX - (x * 200), 
+                              game.world.height - 300, 'processor');
         }
         return processors;
     }
