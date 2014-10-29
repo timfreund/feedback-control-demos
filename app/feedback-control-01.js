@@ -82,8 +82,8 @@ function createFeedbackControlDemo() {
             if(i == 1){
                 x = game.world.width - 200;
             }
-            var p = processors.create(x,
-                                      game.world.height - 300, 'processor');
+            var p = processors.create(x, game.world.height - 300, 'processor');
+            p.tint = 0x00ff00;
             p.healthy = true;
         }
         return processors;
