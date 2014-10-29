@@ -42,6 +42,8 @@ function createFeedbackControlDemo() {
     }
 
     function requestClientArrivalHandler(request, client){
+        request.tint = 0xffffff;
+        request.success = null;
         request.kill();
     }
 
