@@ -8,6 +8,7 @@ function createFeedbackControlDemo() {
         game.load.image('processor', 'assets/sprites/processor.png');
         game.load.image('client', 'assets/sprites/client.png');
         game.load.image('payload', 'assets/sprites/payload.png');
+        game.load.image('arrow', 'assets/sprites/arrow.png');
 
     }
 
@@ -16,19 +17,37 @@ function createFeedbackControlDemo() {
     game.domain = domain;
     domain.clients = null;
     domain.processors = null;
+    domain.activeProcessor = null;
     domain.requests = null;
+    domain.arrow = null;
 
     function create () {
         game.physics.startSystem(Phaser.Physics.ARCADE);
         domain.clients = createClients();
         domain.processors = createProcessors();
+        domain.activeProcessor = domain.processors.children[0];
         domain.requests = createRequests();
+        domain.arrow = game.add.sprite(game.world.centerX, game.world.height - 200, 'arrow');
+        domain.arrow.anchor.setTo(0.5, 0.5);
+
         
         game.time.events.loop(Phaser.Timer.SECOND * 5, determineProcessorHealth, this);
     }
 
+    function handleInput(){
+        if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+            domain.arrow.angle = 0;
+            domain.activeProcessor = domain.processors.children[0];
+        }
+        if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+            domain.arrow.angle = 180;
+            domain.activeProcessor = domain.processors.children[1];
+        }
+    }
+
     function update() {
         sendRequests();
+        handleInput();
         game.physics.arcade.overlap(d.requests, d.processors, requestProcArrivalHandler, null, this);
         game.physics.arcade.overlap(d.requests, d.clients, requestClientArrivalHandler, null, this);
     }
@@ -55,9 +74,9 @@ function createFeedbackControlDemo() {
                 request = d.requests.getFirstExists(false);
                 request.reset(client.body.x, client.body.y + client.body.height + 2);
                 request.client = client;
-                game.physics.arcade.moveToObject(request, d.processors.children[0], 500);
+                game.physics.arcade.moveToObject(request, d.activeProcessor, 500);
             }
-        });
+            });
     }
 
     function createClients(){
