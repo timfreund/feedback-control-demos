@@ -75,8 +75,12 @@ function createFeedbackControlDemo() {
         var processors = game.add.group();
         processors.enableBody = true;
         processors.physicsBodyType = Phaser.Physics.ARCADE;
-        for(var x = 0; x < 2; x++){
-            var p = processors.create(game.world.centerX - (x * 300),
+        for(var i = 0; i < 2; i++){
+            var x = 25;
+            if(i == 1){
+                x = game.world.width - 200;
+            }
+            var p = processors.create(x,
                                       game.world.height - 300, 'processor');
             p.healthy = true;
         }
