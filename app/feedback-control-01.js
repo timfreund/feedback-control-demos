@@ -29,13 +29,20 @@ function createFeedbackControlDemo() {
 
     function update() {
         sendRequests();
-        game.physics.arcade.overlap(d.requests, d.processors, requestArrivalHandler, null, this);
+        game.physics.arcade.overlap(d.requests, d.processors, requestProcArrivalHandler, null, this);
+        game.physics.arcade.overlap(d.requests, d.clients, requestClientArrivalHandler, null, this);
     }
 
-    function requestArrivalHandler(request, processor) {
-        request.kill();
+    function requestProcArrivalHandler(request, processor) {
+        request.tint = processor.tint;
+        request.success = processor.health;
+        game.physics.arcade.moveToObject(request, request.client, 500);
+        // request.kill();
         // console.log(request.client.body.x + " " + request.client.body.y);
+    }
 
+    function requestClientArrivalHandler(request, client){
+        request.kill();
     }
 
     function sendRequests(){
@@ -44,7 +51,7 @@ function createFeedbackControlDemo() {
             if(client.lastRequest + client.requestPeriod <= game.time.now){
                 client.lastRequest = game.time.now;
                 request = d.requests.getFirstExists(false);
-                request.reset(client.body.x, client.body.y);
+                request.reset(client.body.x, client.body.y + client.body.height + 2);
                 request.client = client;
                 game.physics.arcade.moveToObject(request, d.processors.children[0], 500);
             }
@@ -69,7 +76,7 @@ function createFeedbackControlDemo() {
         processors.enableBody = true;
         processors.physicsBodyType = Phaser.Physics.ARCADE;
         for(var x = 0; x < 2; x++){
-            var p = processors.create(game.world.centerX - (x * 200),
+            var p = processors.create(game.world.centerX - (x * 300),
                                       game.world.height - 300, 'processor');
             p.healthy = true;
         }
