@@ -18,31 +18,23 @@ function createFeedbackControlDemo() {
     domain.processors = null;
     domain.requests = null;
 
-    var fired = false;
-
     function create () {
         game.physics.startSystem(Phaser.Physics.ARCADE);
         domain.clients = createClients();
         domain.processors = createProcessors();
         domain.requests = createRequests();
+        
+        game.time.events.loop(Phaser.Timer.SECOND * 5, determineProcessorHealth, this);
     }
 
     function update() {
-        if(!fired){
-            var payload = game.add.sprite(d.clients.children[0].x, d.clients.children[0].y, 'payload')
-            game.physics.enable(payload, Phaser.Physics.ARCADE);
-            game.physics.arcade.moveToObject(payload, d.processors.children[0], null, 250);
-            fired = true;
-        }
-
-
         sendRequests();
-
         game.physics.arcade.overlap(d.requests, d.processors, requestArrivalHandler, null, this);
     }
 
     function requestArrivalHandler(request, processor) {
         request.kill();
+        // console.log(request.client.body.x + " " + request.client.body.y);
 
     }
 
@@ -53,6 +45,7 @@ function createFeedbackControlDemo() {
                 client.lastRequest = game.time.now;
                 request = d.requests.getFirstExists(false);
                 request.reset(client.body.x, client.body.y);
+                request.client = client;
                 game.physics.arcade.moveToObject(request, d.processors.children[0], 500);
             }
         });
@@ -65,8 +58,7 @@ function createFeedbackControlDemo() {
 
         for(var x = 0; x < 10; x++){
             var c = clients.create(game.world.width / 10 * x, 50, 'client');
-            c.requestPeriod = (Math.floor(Math.random() * (10 - 5)) + 5) * 1000;
-            console.log(c.requestPeriod);
+            c.requestPeriod = (Math.floor(Math.random() * (5 - 2)) + 2) * 1000;
             c.lastRequest = game.time.now;
         }
         return clients;
@@ -77,8 +69,9 @@ function createFeedbackControlDemo() {
         processors.enableBody = true;
         processors.physicsBodyType = Phaser.Physics.ARCADE;
         for(var x = 0; x < 2; x++){
-            processors.create(game.world.centerX - (x * 200), 
-                              game.world.height - 300, 'processor');
+            var p = processors.create(game.world.centerX - (x * 200),
+                                      game.world.height - 300, 'processor');
+            p.healthy = true;
         }
         return processors;
     }
@@ -89,6 +82,30 @@ function createFeedbackControlDemo() {
         requests.physicsBodyType = Phaser.Physics.ARCADE;
         requests.createMultiple(domain.clients.length * 2, 'payload');
         return requests;
+    }
+
+    function determineProcessorHealth() {
+        // At least one processor should be healthy at all times.
+        // Both processors *can* be healthy at the same time.
+        // This method will be called every 20 seconds
+        var universalHealth = true;
+
+        console.log("determineProcessorHealth");
+        d.processors.forEach(function(processor) {
+            if (universalHealth) {
+                if (Math.random() > 0.50){
+                    universalHealth = false;
+                    processor.health = false;
+                    processor.tint = 0xff0000;
+                } else {
+                    processor.health = true;
+                    processor.tint = 0x00ff00;
+                }
+            } else {
+                processor.health = true;
+                processor.tint = 0x00ff00;
+            }
+        });
     }
 
     return game;
