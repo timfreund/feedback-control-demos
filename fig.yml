@@ -1,0 +1,8 @@
+web:
+  build: .
+  command: brunch watch -P -s
+  ports:
+    - "3333:3333"
+  volumes:
+    - ./app:/code/app
+    - ./public:/code/public
