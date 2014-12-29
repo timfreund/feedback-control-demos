@@ -53,15 +53,21 @@ function createFeedbackControlDemo() {
     }
 
     function requestProcArrivalHandler(request, processor) {
-        request.tint = processor.tint;
+        var target = {}; // is this right?
+        target.x = request.client.x;
+        target.y = request.client.y + request.client.height;
         request.success = processor.health;
-        game.physics.arcade.moveToObject(request, request.client, 500);
+        game.physics.arcade.moveToObject(request, target, 500);
         // request.kill();
         // console.log(request.client.body.x + " " + request.client.body.y);
     }
 
     function requestClientArrivalHandler(request, client){
-        request.tint = 0xffffff;
+        if (request.success){
+            client.tint = 0x00ff00;
+        } else {
+            client.tint = 0xff0000;
+        }
         request.success = null;
         request.kill();
     }
@@ -102,7 +108,6 @@ function createFeedbackControlDemo() {
                 x = game.world.width - 200;
             }
             var p = processors.create(x, game.world.height - 300, 'processor');
-            p.tint = 0x00ff00;
             p.healthy = true;
         }
         return processors;
@@ -128,14 +133,11 @@ function createFeedbackControlDemo() {
                 if (Math.random() > 0.50){
                     universalHealth = false;
                     processor.health = false;
-                    processor.tint = 0xff0000;
                 } else {
                     processor.health = true;
-                    processor.tint = 0x00ff00;
                 }
             } else {
                 processor.health = true;
-                processor.tint = 0x00ff00;
             }
         });
     }
